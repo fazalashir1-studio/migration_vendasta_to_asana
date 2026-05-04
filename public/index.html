@@ -238,12 +238,37 @@ function initCharts(){
 }
 window.addEventListener('load',initCharts);
 async function startSync(){
-  const btn=document.getElementById('syncBtn'),log=document.getElementById('sync-log');
-  btn.disabled=true;btn.textContent='⏳ Syncing...';log.style.display='block';log.textContent='';
+  const btn=document.getElementById('syncBtn');
+  const log=document.getElementById('sync-log');
+  btn.textContent='⏳ Syncing...';
+  btn.disabled=true;
+  log.style.display='block';
+  log.textContent='Starting sync...\n';
+  
   const es=new EventSource('/sync');
-  es.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.msg){log.textContent+=d.msg+'\n';log.scrollTop=log.scrollHeight;}if(d.done){es.close();btn.disabled=false;btn.textContent='✅ Synced! Run Again';document.getElementById('asana-link-container').innerHTML='<a href="'+d.url+'" target="_blank" class="asana-link">Open Asana Project →</a>';}if(d.error){es.close();btn.disabled=false;btn.textContent='❌ Error — Try Again';log.textContent+='\n❌ Error: '+d.error;}};
-  es.onerror=()=>{es.close();btn.disabled=false;btn.textContent='❌ Error — Try Again';};
-}
-</script>
+  es.onmessage=function(e){
+    const msg=e.data;
+    if(msg==='DONE'){
+      es.close();
+      btn.textContent='✅ Synced to Asana!';
+      btn.disabled=false;
+      log.textContent+='\n✅ Sync complete! Asana dashboard updated.';
+    } else if(msg.startsWith('ERROR:')){
+      es.close();
+      btn.textContent='❌ Error — Try Again';
+      btn.disabled=false;
+      log.textContent+='\n'+msg;
+    } else {
+      log.textContent+='\n'+msg;
+      log.scrollTop=log.scrollHeight;
+    }
+  };
+  es.onerror=function(){
+    es.close();
+    btn.textContent='❌ Error — Try Again';
+    btn.disabled=false;
+    log.textContent+='\nConnection error - please try again.';
+  };
+}</script>
 </body>
 </html>
