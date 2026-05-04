@@ -1,225 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendasta → Asana Sync</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f4f5f7;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      width: 100%;
-      max-width: 640px;
-      overflow: hidden;
-    }
-
-    .card-header {
-      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-      padding: 32px 36px;
-      color: #fff;
-    }
-    .card-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .card-header p  { font-size: 14px; opacity: 0.85; }
-
-    .card-body { padding: 32px 36px; }
-
-    .meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-    .meta-item {
-      background: #f4f5f7;
-      border-radius: 8px;
-      padding: 14px 16px;
-    }
-    .meta-item .label { font-size: 11px; color: #7b8794; text-transform: uppercase; letter-spacing: .5px; }
-    .meta-item .value { font-size: 15px; font-weight: 600; color: #172b4d; margin-top: 4px; }
-
-    #syncBtn {
-      width: 100%;
-      padding: 14px;
-      background: #1a73e8;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    #syncBtn:hover:not(:disabled) { background: #1557b0; }
-    #syncBtn:active:not(:disabled) { transform: scale(0.98); }
-    #syncBtn:disabled { opacity: 0.65; cursor: not-allowed; }
-
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #console {
-      margin-top: 24px;
-      background: #0d1117;
-      border-radius: 8px;
-      padding: 16px 18px;
-      max-height: 300px;
-      overflow-y: auto;
-      display: none;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 12.5px;
-      line-height: 1.7;
-    }
-    .log-line  { color: #c9d1d9; }
-    .log-error { color: #f85149; }
-    .log-done  { color: #3fb950; font-weight: 600; }
-
-    #resultBanner {
-      margin-top: 20px;
-      border-radius: 8px;
-      padding: 16px 20px;
-      display: none;
-      font-size: 14px;
-      font-weight: 500;
-    }
-    #resultBanner.success {
-      background: #e6f4ea;
-      color: #137333;
-      border: 1px solid #b7dfc7;
-    }
-    #resultBanner.error {
-      background: #fce8e6;
-      color: #c5221f;
-      border: 1px solid #f5c6c2;
-    }
-    #resultBanner a { color: inherit; font-weight: 700; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendasta Executive Report — April 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+.header { background: #fff; border-bottom: 3px solid #7b68ee; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 22px; font-weight: 700; color: #2c2c2c; }
+.period { font-size: 16px; font-weight: 600; color: #7b68ee; }
+.nav-tabs { background: #fff; padding: 0 32px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 4px; }
+.nav-tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; color: #666; }
+.nav-tab.active { color: #7b68ee; border-bottom-color: #7b68ee; }
+.main { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+.section { display: none; }
+.section.active { display: block; }
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e8e8e8; }
+.section-header h2 { font-size: 20px; font-weight: 700; }
+.section-header .subtitle { font-size: 13px; color: #888; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.kpi-card .label { font-size: 12px; color: #888; margin-bottom: 8px; }
+.kpi-card .value { font-size: 28px; font-weight: 700; color: #2c2c2c; }
+.kpi-card .change { font-size: 12px; margin-top: 6px; }
+.change.up { color: #27ae60; } .change.down { color: #e74c3c; } .change.neutral { color: #888; }
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.chart-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.chart-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.chart-sub { font-size: 12px; color: #888; margin-bottom: 16px; }
+canvas { max-height: 200px; }
+.table-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+.table-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #e0e0e0; }
+td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+.badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge.green { background: #d4edda; color: #155724; } .badge.orange { background: #fff3cd; color: #856404; } .badge.red { background: #f8d7da; color: #721c24; }
+.sync-btn { background: linear-gradient(135deg, #7b68ee, #5a4fcf); color: #fff; border: none; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 24px; }
+.sync-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+#sync-log { background: #1a1a2e; color: #00ff88; font-family: monospace; font-size: 13px; padding: 16px; border-radius: 8px; min-height: 80px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; display: none; margin-bottom: 24px; }
+.traffic-bar { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+.traffic-bar .name { width: 130px; font-size: 13px; }
+.traffic-bar .bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 8px; }
+.traffic-bar .bar-fill { height: 8px; border-radius: 4px; background: #7b68ee; }
+.traffic-bar .count { width: 60px; text-align: right; font-size: 13px; font-weight: 600; }
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.progress-item { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.progress-item h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+.progress-bar-wrap { background: #f0f0f0; border-radius: 6px; height: 10px; margin: 6px 0; }
+.progress-bar-fill { height: 10px; border-radius: 6px; }
+.asana-link { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #7b68ee; color: #7b68ee; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-top: 16px; }
+</style>
 </head>
 <body>
-<div class="card">
-  <div class="card-header">
-    <h1>Vendasta Executive Report — April 2026</h1>
-    <p>One-click sync to Asana: creates the project, 7 sections, and all tasks.</p>
+<div class="header">
+  <div><h1>Executive Report</h1><div style="font-size:12px;color:#888">Visit Fairfield, Fairfield CVB — 107 North Main Street, Fairfield, IA</div></div>
+  <div class="period">April 2026</div>
+</div>
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showSection('overview',this)">Overview</div>
+  <div class="nav-tab" onclick="showSection('website',this)">Website</div>
+  <div class="nav-tab" onclick="showSection('traffic',this)">Traffic</div>
+  <div class="nav-tab" onclick="showSection('seo',this)">SEO</div>
+  <div class="nav-tab" onclick="showSection('listings',this)">Listings</div>
+  <div class="nav-tab" onclick="showSection('leads',this)">Leads</div>
+  <div class="nav-tab" onclick="showSection('sync',this)">Sync to Asana</div>
+</div>
+<div class="main">
+<div id="overview" class="section active">
+  <div class="section-header"><h2>Overview</h2><span class="subtitle">All metrics — April 2026</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="label">Total Tasks</div><div class="value">26</div><div class="change down">20 in progress, 6 completed</div></div>
+    <div class="kpi-card"><div class="label">Projects</div><div class="value">1</div><div class="change neutral">SEO Standard — 40%</div></div>
+    <div class="kpi-card"><div class="label">Active Users</div><div class="value">2,517</div><div class="change down">▼ 788</div></div>
+    <div class="kpi-card"><div class="label">Listing Score</div><div class="value">753</div><div class="change up">▲ 30 — Grade A</div></div>
+    <div class="kpi-card"><div class="label">Organic Clicks</div><div class="value">943</div><div class="change down">▼ 233</div></div>
+    <div class="kpi-card"><div class="label">Web Chat Visitors</div><div class="value">2</div><div class="change up">▲ 2</div></div>
   </div>
-
-  <div class="card-body">
-    <div class="meta-grid">
-      <div class="meta-item">
-        <div class="label">Project</div>
-        <div class="value">Vendasta Exec Report</div>
-      </div>
-      <div class="meta-item">
-        <div class="label">Period</div>
-        <div class="value">April 2026</div>
-      </div>
-      <div class="meta-item">
-        <div class="label">Sections</div>
-        <div class="value">7 sections</div>
-      </div>
-      <div class="meta-item">
-        <div class="label">Total Tasks</div>
-        <div class="value">42 tasks</div>
+  <div class="overview-grid">
+    <div class="progress-item"><h3>Task Progress</h3>
+      <div style="font-size:13px;margin-bottom:4px">In Progress (20)</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:77%;background:#9b59b6"></div></div>
+      <div style="font-size:13px;margin-top:10px;margin-bottom:4px">Completed (6)</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:23%;background:#3498db"></div></div>
+    </div>
+    <div class="progress-item"><h3>SEO Standard Project</h3>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Progress</span><span style="color:#f39c12">40%</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:40%;background:#3498db"></div></div>
+      <div style="font-size:12px;color:#888;margin-top:12px">
+        <div>• On-Page SEO Optimization — Waiting on review (Apr 22)</div>
+        <div>• FAQ Schema on All Key Pages — FAQs added (Apr 22)</div>
       </div>
     </div>
-
-    <button id="syncBtn" onclick="startSync()">
-      <div class="spinner" id="spinner"></div>
-      <span id="btnText">Sync to Asana</span>
-    </button>
-
-    <div id="resultBanner"></div>
-    <div id="console"></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Task Activity</h3><div class="chart-sub">Weekly in progress vs completed</div><canvas id="taskChart"></canvas></div>
+    <div class="chart-card"><h3>Website Active Users</h3><div class="chart-sub">Weekly — April 2026</div><canvas id="overviewWebChart"></canvas></div>
   </div>
 </div>
-
+<div id="website" class="section">
+  <div class="section-header"><h2>Website</h2><span class="subtitle">Is your website attracting potential customers?</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="label">Active Users</div><div class="value">2,517</div><div class="change down">▼ 788</div></div>
+    <div class="kpi-card"><div class="label">Sessions</div><div class="value">2,836</div><div class="change down">▼ 811</div></div>
+    <div class="kpi-card"><div class="label">Page Views</div><div class="value">5,220</div><div class="change down">▼ 506</div></div>
+    <div class="kpi-card"><div class="label">New Users</div><div class="value">2,329</div><div class="change down">▼ 757</div></div>
+    <div class="kpi-card"><div class="label">Avg Session Duration</div><div class="value">2:05</div><div class="change up">▲ 0:28</div></div>
+    <div class="kpi-card"><div class="label">Pages / Session</div><div class="value">1.84</div><div class="change up">▲ 0.27</div></div>
+    <div class="kpi-card"><div class="label">Bounce Rate</div><div class="value">59.91%</div><div class="change down">▲ 1.48%</div></div>
+    <div class="kpi-card"><div class="label">Engaged Sessions</div><div class="value">1,137</div><div class="change down">▼ 379</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Active Users</h3><div class="chart-sub">Weekly — Google Analytics 4</div><canvas id="activeUsersChart"></canvas></div>
+    <div class="chart-card"><h3>Sessions</h3><div class="chart-sub">Weekly — Google Analytics 4</div><canvas id="sessionsChart"></canvas></div>
+    <div class="chart-card"><h3>Page Views</h3><div class="chart-sub">Weekly — Google Analytics 4</div><canvas id="pageViewsChart"></canvas></div>
+    <div class="chart-card"><h3>New vs Returning Users</h3><div class="chart-sub">April 2026</div><canvas id="usersDonutChart"></canvas></div>
+  </div>
+</div>
+<div id="traffic" class="section">
+  <div class="section-header"><h2>Traffic Sources</h2><span class="subtitle">Where are your visitors coming from?</span></div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Traffic by Channel</h3><div class="chart-sub">Sessions by source — April 2026</div><canvas id="trafficPieChart"></canvas></div>
+    <div class="chart-card"><h3>Top Referral Sources</h3><div class="chart-sub">Visitors by referral</div>
+      <div class="traffic-bar"><span class="name">google</span><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div><span class="count">1,197</span></div>
+      <div class="traffic-bar"><span class="name">direct</span><div class="bar-wrap"><div class="bar-fill" style="width:73%"></div></div><span class="count">869</span></div>
+      <div class="traffic-bar"><span class="name">fb</span><div class="bar-wrap"><div class="bar-fill" style="width:14%"></div></div><span class="count">172</span></div>
+      <div class="traffic-bar"><span class="name">orange142</span><div class="bar-wrap"><div class="bar-fill" style="width:14%"></div></div><span class="count">169</span></div>
+      <div class="traffic-bar"><span class="name">not set</span><div class="bar-wrap"><div class="bar-fill" style="width:8%"></div></div><span class="count">99</span></div>
+      <div class="traffic-bar"><span class="name">bing</span><div class="bar-wrap"><div class="bar-fill" style="width:8%"></div></div><span class="count">94</span></div>
+      <div class="traffic-bar"><span class="name">yahoo</span><div class="bar-wrap"><div class="bar-fill" style="width:5%"></div></div><span class="count">55</span></div>
+    </div>
+  </div>
+</div>
+<div id="seo" class="section">
+  <div class="section-header"><h2>SEO Performance</h2><span class="subtitle">Do you show up where people are searching?</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="label">Queries on 1st Page</div><div class="value">176</div><div class="change down">▼ 17</div></div>
+    <div class="kpi-card"><div class="label">Organic Clicks</div><div class="value">943</div><div class="change down">▼ 233</div></div>
+    <div class="kpi-card"><div class="label">Impressions</div><div class="value">108,146</div><div class="change down">▼ 13,353</div></div>
+    <div class="kpi-card"><div class="label">Keywords Top 10</div><div class="value">4</div><div class="change neutral">Avg position: 32</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Organic Clicks</h3><div class="chart-sub">Daily — Google Search Console</div><canvas id="seoClicksChart"></canvas></div>
+    <div class="chart-card"><h3>Impressions</h3><div class="chart-sub">Daily — Google Search Console</div><canvas id="seoImpressionsChart"></canvas></div>
+  </div>
+  <div class="table-card"><h3>Top Search Queries</h3><table><thead><tr><th>Query</th><th>Clicks</th><th>Avg Position</th></tr></thead><tbody>
+    <tr><td>fairfield iowa</td><td>60</td><td>5.6</td></tr>
+    <tr><td>things to do in fairfield iowa</td><td>12</td><td>2.5</td></tr>
+    <tr><td>weather</td><td>12</td><td>5.6</td></tr>
+    <tr><td>visit fairfield iowa</td><td>12</td><td>1.0</td></tr>
+    <tr><td>haveda</td><td>8</td><td>5.7</td></tr>
+  </tbody></table></div>
+  <div class="table-card"><h3>Top Pages in Google Search</h3><table><thead><tr><th>Page</th><th>Clicks</th><th>Impressions</th></tr></thead><tbody>
+    <tr><td>/</td><td>108</td><td>13,073</td></tr>
+    <tr><td>/things-to-do</td><td>36</td><td>3,186</td></tr>
+    <tr><td>/blog-posts/morel-mushroom-hunting</td><td>33</td><td>3,250</td></tr>
+    <tr><td>/event-directory</td><td>27</td><td>2,959</td></tr>
+    <tr><td>/business/vintage-power-wagon-rally</td><td>19</td><td>144</td></tr>
+  </tbody></table></div>
+</div>
+<div id="listings" class="section">
+  <div class="section-header"><h2>Listings</h2><span class="subtitle">Are you listed accurately on search engines and directories?</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="label">Listing Score</div><div class="value" style="color:#27ae60">753</div><div class="change up">▲ 30 — Grade A</div></div>
+    <div class="kpi-card"><div class="label">Industry Average</div><div class="value">221</div><div class="change neutral">You're 3.4x avg</div></div>
+    <div class="kpi-card"><div class="label">95th Percentile</div><div class="value">567</div><div class="change up">You exceed this</div></div>
+    <div class="kpi-card"><div class="label">Accurate</div><div class="value">29</div><div class="change up">✅</div></div>
+    <div class="kpi-card"><div class="label">Possible Errors</div><div class="value">2</div><div class="change down">⚠️</div></div>
+    <div class="kpi-card"><div class="label">Not Found</div><div class="value">23</div><div class="change down">❌</div></div>
+    <div class="kpi-card"><div class="label">Citations</div><div class="value">25</div><div class="change neutral">Across the web</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Listing Score Over Time</h3><div class="chart-sub">Score progression — March to April 2026</div><canvas id="listingScoreChart"></canvas></div>
+    <div class="chart-card"><h3>Listing Accuracy Breakdown</h3><div class="chart-sub">Status of all listing sources</div><canvas id="listingPieChart"></canvas></div>
+  </div>
+  <div class="table-card"><h3>Listing Sources</h3><table><thead><tr><th>Platform</th><th>Accuracy</th><th>Sync Status</th></tr></thead><tbody>
+    <tr><td>Google</td><td><span class="badge green">Accurate</span></td><td>Syncing disabled</td></tr>
+    <tr><td>Facebook</td><td><span class="badge orange">Possible Errors</span></td><td>Syncing disabled</td></tr>
+    <tr><td>Yelp</td><td><span class="badge orange">Possible Errors</span></td><td>Synced</td></tr>
+    <tr><td>Bing</td><td><span class="badge green">Accurate</span></td><td>Synced</td></tr>
+    <tr><td>Neustar / Localeze</td><td><span class="badge green">Accurate</span></td><td>Submitted</td></tr>
+    <tr><td>Data Axle</td><td><span class="badge red">Not Found</span></td><td>Submitted</td></tr>
+  </tbody></table></div>
+</div>
+<div id="leads" class="section">
+  <div class="section-header"><h2>Leads &amp; Engagement</h2><span class="subtitle">How many new leads and customer interactions are you generating?</span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="label">Messages</div><div class="value">0</div><div class="change neutral">No change</div></div>
+    <div class="kpi-card"><div class="label">AI Conversations</div><div class="value">0</div><div class="change neutral">No change</div></div>
+    <div class="kpi-card"><div class="label">Leads Created</div><div class="value">0</div><div class="change neutral">No change</div></div>
+    <div class="kpi-card"><div class="label">Total Contacts (CRM)</div><div class="value">0</div><div class="change neutral">No change</div></div>
+    <div class="kpi-card"><div class="label">Total Companies (CRM)</div><div class="value">0</div><div class="change neutral">No change</div></div>
+    <div class="kpi-card"><div class="label">Web Chat Visitors</div><div class="value">2</div><div class="change up">▲ 2</div></div>
+    <div class="kpi-card"><div class="label">Web Chat Engaged</div><div class="value">0</div><div class="change neutral">No change</div></div>
+    <div class="kpi-card"><div class="label">Captured Leads</div><div class="value">0</div><div class="change neutral">No change</div></div>
+  </div>
+</div>
+<div id="sync" class="section">
+  <div class="section-header"><h2>Sync to Asana</h2><span class="subtitle">Push all Executive Report data to your Asana dashboard</span></div>
+  <button class="sync-btn" id="syncBtn" onclick="startSync()">🔄 Sync All Data to Asana</button>
+  <div id="sync-log"></div>
+  <div id="asana-link-container"></div>
+  <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:16px">What gets synced to Asana:</h3>
+    <ul style="list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">📈 Website Metrics — 8 KPI tasks with details</li>
+      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">🚦 Traffic Sources — 7 channel tasks</li>
+      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">🔍 SEO Performance — 4 metric tasks</li>
+      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">📋 Listings &amp; Citations — 7 tasks</li>
+      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">👥 Leads &amp; Engagement — summary task</li>
+      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">✅ Tasks &amp; Projects — 2 overview tasks</li>
+    </ul>
+  </div>
+</div>
+</div>
 <script>
-  function startSync() {
-    const btn      = document.getElementById("syncBtn");
-    const spinner  = document.getElementById("spinner");
-    const btnText  = document.getElementById("btnText");
-    const cons     = document.getElementById("console");
-    const banner   = document.getElementById("resultBanner");
-
-    btn.disabled       = true;
-    spinner.style.display = "block";
-    btnText.textContent   = "Syncing…";
-    cons.style.display    = "block";
-    cons.innerHTML        = "";
-    banner.style.display  = "none";
-    banner.className      = "";
-
-    const evtSource = new EventSource("/sync");
-
-    evtSource.onmessage = (e) => {
-      const { type, payload } = JSON.parse(e.data);
-
-      if (type === "log") {
-        appendLine(cons, payload, "log-line");
-      } else if (type === "done") {
-        appendLine(cons, "✓ Sync complete!", "log-done");
-        evtSource.close();
-        btn.disabled          = false;
-        spinner.style.display = "none";
-        btnText.textContent   = "Sync to Asana";
-        showBanner("success",
-          `Project created successfully! <a href="${payload}" target="_blank" rel="noopener">Open in Asana →</a>`
-        );
-      } else if (type === "error") {
-        appendLine(cons, `✗ Error: ${payload}`, "log-error");
-        evtSource.close();
-        btn.disabled          = false;
-        spinner.style.display = "none";
-        btnText.textContent   = "Retry Sync";
-        showBanner("error", `Sync failed: ${payload}`);
-      }
-    };
-
-    evtSource.onerror = () => {
-      appendLine(cons, "✗ Connection lost.", "log-error");
-      evtSource.close();
-      btn.disabled          = false;
-      spinner.style.display = "none";
-      btnText.textContent   = "Retry Sync";
-      showBanner("error", "Connection to server lost. Is the server running?");
-    };
-  }
-
-  function appendLine(el, text, cls) {
-    const div = document.createElement("div");
-    div.className = cls;
-    div.textContent = text;
-    el.appendChild(div);
-    el.scrollTop = el.scrollHeight;
-  }
-
-  function showBanner(type, html) {
-    const banner = document.getElementById("resultBanner");
-    banner.className     = type;
-    banner.innerHTML     = html;
-    banner.style.display = "block";
-  }
+function showSection(name,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById(name).classList.add('active');el.classList.add('active');initCharts();}
+let chartsInit=false;
+function initCharts(){
+  if(chartsInit)return;chartsInit=true;
+  const wk=['Apr 5','Apr 12','Apr 19','Apr 26'];
+  const base={responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}};
+  new Chart(document.getElementById('taskChart'),{type:'bar',data:{labels:['13 Apr','17 Apr','21 Apr','25 Apr','29 Apr','03 May'],datasets:[{label:'In progress',data:[22,22,21,20,20,16],backgroundColor:'#c5b3f5'},{label:'Completed',data:[2,3,4,5,6,6],backgroundColor:'#5a4fcf'}]},options:{responsive:true,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true}}}});
+  new Chart(document.getElementById('overviewWebChart'),{type:'line',data:{labels:wk,datasets:[{data:[380,720,850,480],borderColor:'#7b68ee',backgroundColor:'rgba(123,104,238,0.1)',fill:true,tension:0.4}]},options:base});
+  new Chart(document.getElementById('activeUsersChart'),{type:'line',data:{labels:wk,datasets:[{data:[380,720,850,480],borderColor:'#7b68ee',backgroundColor:'rgba(123,104,238,0.1)',fill:true,tension:0.4}]},options:base});
+  new Chart(document.getElementById('sessionsChart'),{type:'line',data:{labels:wk,datasets:[{data:[420,810,940,550],borderColor:'#3498db',backgroundColor:'rgba(52,152,219,0.1)',fill:true,tension:0.4}]},options:base});
+  new Chart(document.getElementById('pageViewsChart'),{type:'line',data:{labels:wk,datasets:[{data:[780,1450,1720,1100],borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,0.1)',fill:true,tension:0.4}]},options:base});
+  new Chart(document.getElementById('usersDonutChart'),{type:'doughnut',data:{labels:['New Users (2,329)','Returning (188)'],datasets:[{data:[2329,188],backgroundColor:['#7b68ee','#3498db']}]},options:{responsive:true,plugins:{legend:{position:'right'}}}});
+  new Chart(document.getElementById('trafficPieChart'),{type:'doughnut',data:{labels:['Organic (1,190)','Direct (733)','Paid Social (173)','Paid Other (169)','Referral (100)','Unassigned (97)','Paid Search (26)'],datasets:[{data:[1190,733,173,169,100,97,26],backgroundColor:['#7b68ee','#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c']}]},options:{responsive:true,plugins:{legend:{position:'right'}}}});
+  const sl=['Apr 2','Apr 5','Apr 8','Apr 11','Apr 14','Apr 17','Apr 20','Apr 23','Apr 26','Apr 29'];
+  new Chart(document.getElementById('seoClicksChart'),{type:'line',data:{labels:sl,datasets:[{data:[48,42,38,45,35,40,30,28,22,18],borderColor:'#7b68ee',backgroundColor:'rgba(123,104,238,0.1)',fill:true,tension:0.4}]},options:base});
+  new Chart(document.getElementById('seoImpressionsChart'),{type:'line',data:{labels:sl,datasets:[{data:[5200,4800,4500,5100,4200,4800,3800,3600,3100,2800],borderColor:'#3498db',backgroundColor:'rgba(52,152,219,0.1)',fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false}}}});
+  new Chart(document.getElementById('listingScoreChart'),{type:'line',data:{labels:['Mar 16','Mar 24','Apr 1','Apr 8','Apr 16','Apr 24'],datasets:[{data:[399,480,580,650,710,753],borderColor:'#27ae60',backgroundColor:'rgba(39,174,96,0.1)',fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:900}}}});
+  new Chart(document.getElementById('listingPieChart'),{type:'doughnut',data:{labels:['Accurate (29)','Possible Errors (2)','Not Found (23)'],datasets:[{data:[29,2,23],backgroundColor:['#27ae60','#f39c12','#e74c3c']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+}
+window.addEventListener('load',initCharts);
+async function startSync(){
+  const btn=document.getElementById('syncBtn'),log=document.getElementById('sync-log');
+  btn.disabled=true;btn.textContent='⏳ Syncing...';log.style.display='block';log.textContent='';
+  const es=new EventSource('/sync');
+  es.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.msg){log.textContent+=d.msg+'\n';log.scrollTop=log.scrollHeight;}if(d.done){es.close();btn.disabled=false;btn.textContent='✅ Synced! Run Again';document.getElementById('asana-link-container').innerHTML='<a href="'+d.url+'" target="_blank" class="asana-link">Open Asana Project →</a>';}if(d.error){es.close();btn.disabled=false;btn.textContent='❌ Error — Try Again';log.textContent+='\n❌ Error: '+d.error;}};
+  es.onerror=()=>{es.close();btn.disabled=false;btn.textContent='❌ Error — Try Again';};
+}
 </script>
 </body>
 </html>
