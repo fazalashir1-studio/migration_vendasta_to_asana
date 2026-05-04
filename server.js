@@ -224,7 +224,7 @@ async function ensureSection(name, send) {
     const existing = sections.find(s => s.name === name);
     if (existing) return existing.gid;
     send(`Creating section: ${name}`);
-    const created = await asanaPost(`/projects/${PROJECT_GID}/sections`, { name, project: PROJECT_GID });
+    const created = await asanaPost(`/projects/${PROJECT_GID}/sections`, { name });
     return created.gid;
 }
 
