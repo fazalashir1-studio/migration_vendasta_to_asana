@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendasta → Asana Sync</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f5f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 640px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      padding: 32px 36px;
+      color: #fff;
+    }
+    .card-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .card-header p  { font-size: 14px; opacity: 0.85; }
+
+    .card-body { padding: 32px 36px; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .meta-item {
+      background: #f4f5f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .meta-item .label { font-size: 11px; color: #7b8794; text-transform: uppercase; letter-spacing: .5px; }
+    .meta-item .value { font-size: 15px; font-weight: 600; color: #172b4d; margin-top: 4px; }
+
+    #syncBtn {
+      width: 100%;
+      padding: 14px;
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    #syncBtn:hover:not(:disabled) { background: #1557b0; }
+    #syncBtn:active:not(:disabled) { transform: scale(0.98); }
+    #syncBtn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #console {
+      margin-top: 24px;
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 16px 18px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+    .log-line  { color: #c9d1d9; }
+    .log-error { color: #f85149; }
+    .log-done  { color: #3fb950; font-weight: 600; }
+
+    #resultBanner {
+      margin-top: 20px;
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    #resultBanner.success {
+      background: #e6f4ea;
+      color: #137333;
+      border: 1px solid #b7dfc7;
+    }
+    #resultBanner.error {
+      background: #fce8e6;
+      color: #c5221f;
+      border: 1px solid #f5c6c2;
+    }
+    #resultBanner a { color: inherit; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <h1>Vendasta Executive Report — April 2026</h1>
+    <p>One-click sync to Asana: creates the project, 7 sections, and all tasks.</p>
+  </div>
+
+  <div class="card-body">
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">Project</div>
+        <div class="value">Vendasta Exec Report</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Period</div>
+        <div class="value">April 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Sections</div>
+        <div class="value">7 sections</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Total Tasks</div>
+        <div class="value">42 tasks</div>
+      </div>
+    </div>
+
+    <button id="syncBtn" onclick="startSync()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btnText">Sync to Asana</span>
+    </button>
+
+    <div id="resultBanner"></div>
+    <div id="console"></div>
+  </div>
+</div>
+
+<script>
+  function startSync() {
+    const btn      = document.getElementById("syncBtn");
+    const spinner  = document.getElementById("spinner");
+    const btnText  = document.getElementById("btnText");
+    const cons     = document.getElementById("console");
+    const banner   = document.getElementById("resultBanner");
+
+    btn.disabled       = true;
+    spinner.style.display = "block";
+    btnText.textContent   = "Syncing…";
+    cons.style.display    = "block";
+    cons.innerHTML        = "";
+    banner.style.display  = "none";
+    banner.className      = "";
+
+    const evtSource = new EventSource("/sync");
+
+    evtSource.onmessage = (e) => {
+      const { type, payload } = JSON.parse(e.data);
+
+      if (type === "log") {
+        appendLine(cons, payload, "log-line");
+      } else if (type === "done") {
+        appendLine(cons, "✓ Sync complete!", "log-done");
+        evtSource.close();
+        btn.disabled          = false;
+        spinner.style.display = "none";
+        btnText.textContent   = "Sync to Asana";
+        showBanner("success",
+          `Project created successfully! <a href="${payload}" target="_blank" rel="noopener">Open in Asana →</a>`
+        );
+      } else if (type === "error") {
+        appendLine(cons, `✗ Error: ${payload}`, "log-error");
+        evtSource.close();
+        btn.disabled          = false;
+        spinner.style.display = "none";
+        btnText.textContent   = "Retry Sync";
+        showBanner("error", `Sync failed: ${payload}`);
+      }
+    };
+
+    evtSource.onerror = () => {
+      appendLine(cons, "✗ Connection lost.", "log-error");
+      evtSource.close();
+      btn.disabled          = false;
+      spinner.style.display = "none";
+      btnText.textContent   = "Retry Sync";
+      showBanner("error", "Connection to server lost. Is the server running?");
+    };
+  }
+
+  function appendLine(el, text, cls) {
+    const div = document.createElement("div");
+    div.className = cls;
+    div.textContent = text;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function showBanner(type, html) {
+    const banner = document.getElementById("resultBanner");
+    banner.className     = type;
+    banner.innerHTML     = html;
+    banner.style.display = "block";
+  }
+</script>
+</body>
+</html>
