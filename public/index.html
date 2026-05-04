@@ -1,274 +1,489 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vendasta Executive Report — April 2026</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
-.header { background: #fff; border-bottom: 3px solid #7b68ee; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; }
-.header h1 { font-size: 22px; font-weight: 700; color: #2c2c2c; }
-.period { font-size: 16px; font-weight: 600; color: #7b68ee; }
-.nav-tabs { background: #fff; padding: 0 32px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 4px; }
-.nav-tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; color: #666; }
-.nav-tab.active { color: #7b68ee; border-bottom-color: #7b68ee; }
-.main { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
-.section { display: none; }
-.section.active { display: block; }
-.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e8e8e8; }
-.section-header h2 { font-size: 20px; font-weight: 700; }
-.section-header .subtitle { font-size: 13px; color: #888; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-.kpi-card .label { font-size: 12px; color: #888; margin-bottom: 8px; }
-.kpi-card .value { font-size: 28px; font-weight: 700; color: #2c2c2c; }
-.kpi-card .change { font-size: 12px; margin-top: 6px; }
-.change.up { color: #27ae60; } .change.down { color: #e74c3c; } .change.neutral { color: #888; }
-.charts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px; }
-.chart-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-.chart-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-.chart-sub { font-size: 12px; color: #888; margin-bottom: 16px; }
-canvas { max-height: 200px; }
-.table-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
-.table-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; padding: 8px 12px; background: #f8f9fa; color: #666; font-weight: 600; border-bottom: 2px solid #e0e0e0; }
-td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
-.badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-.badge.green { background: #d4edda; color: #155724; } .badge.orange { background: #fff3cd; color: #856404; } .badge.red { background: #f8d7da; color: #721c24; }
-.sync-btn { background: linear-gradient(135deg, #7b68ee, #5a4fcf); color: #fff; border: none; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 24px; }
-.sync-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-#sync-log { background: #1a1a2e; color: #00ff88; font-family: monospace; font-size: 13px; padding: 16px; border-radius: 8px; min-height: 80px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; display: none; margin-bottom: 24px; }
-.traffic-bar { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
-.traffic-bar .name { width: 130px; font-size: 13px; }
-.traffic-bar .bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 8px; }
-.traffic-bar .bar-fill { height: 8px; border-radius: 4px; background: #7b68ee; }
-.traffic-bar .count { width: 60px; text-align: right; font-size: 13px; font-weight: 600; }
-.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-.progress-item { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-.progress-item h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-.progress-bar-wrap { background: #f0f0f0; border-radius: 6px; height: 10px; margin: 6px 0; }
-.progress-bar-fill { height: 10px; border-radius: 6px; }
-.asana-link { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #7b68ee; color: #7b68ee; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-top: 16px; }
-</style>
-</head>
-<body>
-<div class="header">
-  <div><h1>Executive Report</h1><div style="font-size:12px;color:#888">Visit Fairfield, Fairfield CVB — 107 North Main Street, Fairfield, IA</div></div>
-  <div class="period">April 2026</div>
-</div>
-<div class="nav-tabs">
-  <div class="nav-tab active" onclick="showSection('overview',this)">Overview</div>
-  <div class="nav-tab" onclick="showSection('website',this)">Website</div>
-  <div class="nav-tab" onclick="showSection('traffic',this)">Traffic</div>
-  <div class="nav-tab" onclick="showSection('seo',this)">SEO</div>
-  <div class="nav-tab" onclick="showSection('listings',this)">Listings</div>
-  <div class="nav-tab" onclick="showSection('leads',this)">Leads</div>
-  <div class="nav-tab" onclick="showSection('sync',this)">Sync to Asana</div>
-</div>
-<div class="main">
-<div id="overview" class="section active">
-  <div class="section-header"><h2>Overview</h2><span class="subtitle">All metrics — April 2026</span></div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="label">Total Tasks</div><div class="value">26</div><div class="change down">20 in progress, 6 completed</div></div>
-    <div class="kpi-card"><div class="label">Projects</div><div class="value">1</div><div class="change neutral">SEO Standard — 40%</div></div>
-    <div class="kpi-card"><div class="label">Active Users</div><div class="value">2,517</div><div class="change down">▼ 788</div></div>
-    <div class="kpi-card"><div class="label">Listing Score</div><div class="value">753</div><div class="change up">▲ 30 — Grade A</div></div>
-    <div class="kpi-card"><div class="label">Organic Clicks</div><div class="value">943</div><div class="change down">▼ 233</div></div>
-    <div class="kpi-card"><div class="label">Web Chat Visitors</div><div class="value">2</div><div class="change up">▲ 2</div></div>
-  </div>
-  <div class="overview-grid">
-    <div class="progress-item"><h3>Task Progress</h3>
-      <div style="font-size:13px;margin-bottom:4px">In Progress (20)</div>
-      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:77%;background:#9b59b6"></div></div>
-      <div style="font-size:13px;margin-top:10px;margin-bottom:4px">Completed (6)</div>
-      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:23%;background:#3498db"></div></div>
-    </div>
-    <div class="progress-item"><h3>SEO Standard Project</h3>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Progress</span><span style="color:#f39c12">40%</span></div>
-      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:40%;background:#3498db"></div></div>
-      <div style="font-size:12px;color:#888;margin-top:12px">
-        <div>• On-Page SEO Optimization — Waiting on review (Apr 22)</div>
-        <div>• FAQ Schema on All Key Pages — FAQs added (Apr 22)</div>
-      </div>
-    </div>
-  </div>
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Task Activity</h3><div class="chart-sub">Weekly in progress vs completed</div><canvas id="taskChart"></canvas></div>
-    <div class="chart-card"><h3>Website Active Users</h3><div class="chart-sub">Weekly — April 2026</div><canvas id="overviewWebChart"></canvas></div>
-  </div>
-</div>
-<div id="website" class="section">
-  <div class="section-header"><h2>Website</h2><span class="subtitle">Is your website attracting potential customers?</span></div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="label">Active Users</div><div class="value">2,517</div><div class="change down">▼ 788</div></div>
-    <div class="kpi-card"><div class="label">Sessions</div><div class="value">2,836</div><div class="change down">▼ 811</div></div>
-    <div class="kpi-card"><div class="label">Page Views</div><div class="value">5,220</div><div class="change down">▼ 506</div></div>
-    <div class="kpi-card"><div class="label">New Users</div><div class="value">2,329</div><div class="change down">▼ 757</div></div>
-    <div class="kpi-card"><div class="label">Avg Session Duration</div><div class="value">2:05</div><div class="change up">▲ 0:28</div></div>
-    <div class="kpi-card"><div class="label">Pages / Session</div><div class="value">1.84</div><div class="change up">▲ 0.27</div></div>
-    <div class="kpi-card"><div class="label">Bounce Rate</div><div class="value">59.91%</div><div class="change down">▲ 1.48%</div></div>
-    <div class="kpi-card"><div class="label">Engaged Sessions</div><div class="value">1,137</div><div class="change down">▼ 379</div></div>
-  </div>
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Active Users</h3><div class="chart-sub">Weekly — Google Analytics 4</div><canvas id="activeUsersChart"></canvas></div>
-    <div class="chart-card"><h3>Sessions</h3><div class="chart-sub">Weekly — Google Analytics 4</div><canvas id="sessionsChart"></canvas></div>
-    <div class="chart-card"><h3>Page Views</h3><div class="chart-sub">Weekly — Google Analytics 4</div><canvas id="pageViewsChart"></canvas></div>
-    <div class="chart-card"><h3>New vs Returning Users</h3><div class="chart-sub">April 2026</div><canvas id="usersDonutChart"></canvas></div>
-  </div>
-</div>
-<div id="traffic" class="section">
-  <div class="section-header"><h2>Traffic Sources</h2><span class="subtitle">Where are your visitors coming from?</span></div>
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Traffic by Channel</h3><div class="chart-sub">Sessions by source — April 2026</div><canvas id="trafficPieChart"></canvas></div>
-    <div class="chart-card"><h3>Top Referral Sources</h3><div class="chart-sub">Visitors by referral</div>
-      <div class="traffic-bar"><span class="name">google</span><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div><span class="count">1,197</span></div>
-      <div class="traffic-bar"><span class="name">direct</span><div class="bar-wrap"><div class="bar-fill" style="width:73%"></div></div><span class="count">869</span></div>
-      <div class="traffic-bar"><span class="name">fb</span><div class="bar-wrap"><div class="bar-fill" style="width:14%"></div></div><span class="count">172</span></div>
-      <div class="traffic-bar"><span class="name">orange142</span><div class="bar-wrap"><div class="bar-fill" style="width:14%"></div></div><span class="count">169</span></div>
-      <div class="traffic-bar"><span class="name">not set</span><div class="bar-wrap"><div class="bar-fill" style="width:8%"></div></div><span class="count">99</span></div>
-      <div class="traffic-bar"><span class="name">bing</span><div class="bar-wrap"><div class="bar-fill" style="width:8%"></div></div><span class="count">94</span></div>
-      <div class="traffic-bar"><span class="name">yahoo</span><div class="bar-wrap"><div class="bar-fill" style="width:5%"></div></div><span class="count">55</span></div>
-    </div>
-  </div>
-</div>
-<div id="seo" class="section">
-  <div class="section-header"><h2>SEO Performance</h2><span class="subtitle">Do you show up where people are searching?</span></div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="label">Queries on 1st Page</div><div class="value">176</div><div class="change down">▼ 17</div></div>
-    <div class="kpi-card"><div class="label">Organic Clicks</div><div class="value">943</div><div class="change down">▼ 233</div></div>
-    <div class="kpi-card"><div class="label">Impressions</div><div class="value">108,146</div><div class="change down">▼ 13,353</div></div>
-    <div class="kpi-card"><div class="label">Keywords Top 10</div><div class="value">4</div><div class="change neutral">Avg position: 32</div></div>
-  </div>
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Organic Clicks</h3><div class="chart-sub">Daily — Google Search Console</div><canvas id="seoClicksChart"></canvas></div>
-    <div class="chart-card"><h3>Impressions</h3><div class="chart-sub">Daily — Google Search Console</div><canvas id="seoImpressionsChart"></canvas></div>
-  </div>
-  <div class="table-card"><h3>Top Search Queries</h3><table><thead><tr><th>Query</th><th>Clicks</th><th>Avg Position</th></tr></thead><tbody>
-    <tr><td>fairfield iowa</td><td>60</td><td>5.6</td></tr>
-    <tr><td>things to do in fairfield iowa</td><td>12</td><td>2.5</td></tr>
-    <tr><td>weather</td><td>12</td><td>5.6</td></tr>
-    <tr><td>visit fairfield iowa</td><td>12</td><td>1.0</td></tr>
-    <tr><td>haveda</td><td>8</td><td>5.7</td></tr>
-  </tbody></table></div>
-  <div class="table-card"><h3>Top Pages in Google Search</h3><table><thead><tr><th>Page</th><th>Clicks</th><th>Impressions</th></tr></thead><tbody>
-    <tr><td>/</td><td>108</td><td>13,073</td></tr>
-    <tr><td>/things-to-do</td><td>36</td><td>3,186</td></tr>
-    <tr><td>/blog-posts/morel-mushroom-hunting</td><td>33</td><td>3,250</td></tr>
-    <tr><td>/event-directory</td><td>27</td><td>2,959</td></tr>
-    <tr><td>/business/vintage-power-wagon-rally</td><td>19</td><td>144</td></tr>
-  </tbody></table></div>
-</div>
-<div id="listings" class="section">
-  <div class="section-header"><h2>Listings</h2><span class="subtitle">Are you listed accurately on search engines and directories?</span></div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="label">Listing Score</div><div class="value" style="color:#27ae60">753</div><div class="change up">▲ 30 — Grade A</div></div>
-    <div class="kpi-card"><div class="label">Industry Average</div><div class="value">221</div><div class="change neutral">You're 3.4x avg</div></div>
-    <div class="kpi-card"><div class="label">95th Percentile</div><div class="value">567</div><div class="change up">You exceed this</div></div>
-    <div class="kpi-card"><div class="label">Accurate</div><div class="value">29</div><div class="change up">✅</div></div>
-    <div class="kpi-card"><div class="label">Possible Errors</div><div class="value">2</div><div class="change down">⚠️</div></div>
-    <div class="kpi-card"><div class="label">Not Found</div><div class="value">23</div><div class="change down">❌</div></div>
-    <div class="kpi-card"><div class="label">Citations</div><div class="value">25</div><div class="change neutral">Across the web</div></div>
-  </div>
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Listing Score Over Time</h3><div class="chart-sub">Score progression — March to April 2026</div><canvas id="listingScoreChart"></canvas></div>
-    <div class="chart-card"><h3>Listing Accuracy Breakdown</h3><div class="chart-sub">Status of all listing sources</div><canvas id="listingPieChart"></canvas></div>
-  </div>
-  <div class="table-card"><h3>Listing Sources</h3><table><thead><tr><th>Platform</th><th>Accuracy</th><th>Sync Status</th></tr></thead><tbody>
-    <tr><td>Google</td><td><span class="badge green">Accurate</span></td><td>Syncing disabled</td></tr>
-    <tr><td>Facebook</td><td><span class="badge orange">Possible Errors</span></td><td>Syncing disabled</td></tr>
-    <tr><td>Yelp</td><td><span class="badge orange">Possible Errors</span></td><td>Synced</td></tr>
-    <tr><td>Bing</td><td><span class="badge green">Accurate</span></td><td>Synced</td></tr>
-    <tr><td>Neustar / Localeze</td><td><span class="badge green">Accurate</span></td><td>Submitted</td></tr>
-    <tr><td>Data Axle</td><td><span class="badge red">Not Found</span></td><td>Submitted</td></tr>
-  </tbody></table></div>
-</div>
-<div id="leads" class="section">
-  <div class="section-header"><h2>Leads &amp; Engagement</h2><span class="subtitle">How many new leads and customer interactions are you generating?</span></div>
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="label">Messages</div><div class="value">0</div><div class="change neutral">No change</div></div>
-    <div class="kpi-card"><div class="label">AI Conversations</div><div class="value">0</div><div class="change neutral">No change</div></div>
-    <div class="kpi-card"><div class="label">Leads Created</div><div class="value">0</div><div class="change neutral">No change</div></div>
-    <div class="kpi-card"><div class="label">Total Contacts (CRM)</div><div class="value">0</div><div class="change neutral">No change</div></div>
-    <div class="kpi-card"><div class="label">Total Companies (CRM)</div><div class="value">0</div><div class="change neutral">No change</div></div>
-    <div class="kpi-card"><div class="label">Web Chat Visitors</div><div class="value">2</div><div class="change up">▲ 2</div></div>
-    <div class="kpi-card"><div class="label">Web Chat Engaged</div><div class="value">0</div><div class="change neutral">No change</div></div>
-    <div class="kpi-card"><div class="label">Captured Leads</div><div class="value">0</div><div class="change neutral">No change</div></div>
-  </div>
-</div>
-<div id="sync" class="section">
-  <div class="section-header"><h2>Sync to Asana</h2><span class="subtitle">Push all Executive Report data to your Asana dashboard</span></div>
-  <button class="sync-btn" id="syncBtn" onclick="startSync()">🔄 Sync All Data to Asana</button>
-  <div id="sync-log"></div>
-  <div id="asana-link-container"></div>
-  <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
-    <h3 style="font-size:16px;font-weight:600;margin-bottom:16px">What gets synced to Asana:</h3>
-    <ul style="list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">📈 Website Metrics — 8 KPI tasks with details</li>
-      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">🚦 Traffic Sources — 7 channel tasks</li>
-      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">🔍 SEO Performance — 4 metric tasks</li>
-      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">📋 Listings &amp; Citations — 7 tasks</li>
-      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">👥 Leads &amp; Engagement — summary task</li>
-      <li style="font-size:14px;padding:8px;background:#f8f9fa;border-radius:6px">✅ Tasks &amp; Projects — 2 overview tasks</li>
-    </ul>
-  </div>
-</div>
-</div>
-<script>
-function showSection(name,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById(name).classList.add('active');el.classList.add('active');initCharts();}
-let chartsInit=false;
-function initCharts(){
-  if(chartsInit)return;chartsInit=true;
-  const wk=['Apr 5','Apr 12','Apr 19','Apr 26'];
-  const base={responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}};
-  new Chart(document.getElementById('taskChart'),{type:'bar',data:{labels:['13 Apr','17 Apr','21 Apr','25 Apr','29 Apr','03 May'],datasets:[{label:'In progress',data:[22,22,21,20,20,16],backgroundColor:'#c5b3f5'},{label:'Completed',data:[2,3,4,5,6,6],backgroundColor:'#5a4fcf'}]},options:{responsive:true,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true}}}});
-  new Chart(document.getElementById('overviewWebChart'),{type:'line',data:{labels:wk,datasets:[{data:[380,720,850,480],borderColor:'#7b68ee',backgroundColor:'rgba(123,104,238,0.1)',fill:true,tension:0.4}]},options:base});
-  new Chart(document.getElementById('activeUsersChart'),{type:'line',data:{labels:wk,datasets:[{data:[380,720,850,480],borderColor:'#7b68ee',backgroundColor:'rgba(123,104,238,0.1)',fill:true,tension:0.4}]},options:base});
-  new Chart(document.getElementById('sessionsChart'),{type:'line',data:{labels:wk,datasets:[{data:[420,810,940,550],borderColor:'#3498db',backgroundColor:'rgba(52,152,219,0.1)',fill:true,tension:0.4}]},options:base});
-  new Chart(document.getElementById('pageViewsChart'),{type:'line',data:{labels:wk,datasets:[{data:[780,1450,1720,1100],borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,0.1)',fill:true,tension:0.4}]},options:base});
-  new Chart(document.getElementById('usersDonutChart'),{type:'doughnut',data:{labels:['New Users (2,329)','Returning (188)'],datasets:[{data:[2329,188],backgroundColor:['#7b68ee','#3498db']}]},options:{responsive:true,plugins:{legend:{position:'right'}}}});
-  new Chart(document.getElementById('trafficPieChart'),{type:'doughnut',data:{labels:['Organic (1,190)','Direct (733)','Paid Social (173)','Paid Other (169)','Referral (100)','Unassigned (97)','Paid Search (26)'],datasets:[{data:[1190,733,173,169,100,97,26],backgroundColor:['#7b68ee','#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c']}]},options:{responsive:true,plugins:{legend:{position:'right'}}}});
-  const sl=['Apr 2','Apr 5','Apr 8','Apr 11','Apr 14','Apr 17','Apr 20','Apr 23','Apr 26','Apr 29'];
-  new Chart(document.getElementById('seoClicksChart'),{type:'line',data:{labels:sl,datasets:[{data:[48,42,38,45,35,40,30,28,22,18],borderColor:'#7b68ee',backgroundColor:'rgba(123,104,238,0.1)',fill:true,tension:0.4}]},options:base});
-  new Chart(document.getElementById('seoImpressionsChart'),{type:'line',data:{labels:sl,datasets:[{data:[5200,4800,4500,5100,4200,4800,3800,3600,3100,2800],borderColor:'#3498db',backgroundColor:'rgba(52,152,219,0.1)',fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false}}}});
-  new Chart(document.getElementById('listingScoreChart'),{type:'line',data:{labels:['Mar 16','Mar 24','Apr 1','Apr 8','Apr 16','Apr 24'],datasets:[{data:[399,480,580,650,710,753],borderColor:'#27ae60',backgroundColor:'rgba(39,174,96,0.1)',fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:900}}}});
-  new Chart(document.getElementById('listingPieChart'),{type:'doughnut',data:{labels:['Accurate (29)','Possible Errors (2)','Not Found (23)'],datasets:[{data:[29,2,23],backgroundColor:['#27ae60','#f39c12','#e74c3c']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
-}
-window.addEventListener('load',initCharts);
-async function startSync(){
-  const btn=document.getElementById('syncBtn');
-  const log=document.getElementById('sync-log');
-  btn.textContent='⏳ Syncing...';
-  btn.disabled=true;
-  log.style.display='block';
-  log.textContent='Starting sync...\n';
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Executive Report Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+          .header { background: #fff; border-bottom: 3px solid #7b68ee; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+          .header-left h1 { font-size: 22px; font-weight: 700; color: #2c2c2c; }
+          .header-left p { font-size: 13px; color: #888; margin-top: 2px; }
+          .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+          .month-selector { display: flex; align-items: center; gap: 8px; }
+          .month-selector label { font-size: 13px; color: #666; font-weight: 600; }
+          .month-selector select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; color: #333; background: #fff; cursor: pointer; }
+          .period { font-size: 16px; font-weight: 600; color: #7b68ee; }
+          .nav-tabs { background: #fff; padding: 0 32px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 4px; overflow-x: auto; }
+          .nav-tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; color: #666; white-space: nowrap; }
+          .nav-tab.active { color: #7b68ee; border-bottom-color: #7b68ee; }
+          .main { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+          .section { display: none; }
+          .section.active { display: block; }
+          .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e8e8e8; }
+          .section-header h2 { font-size: 20px; font-weight: 700; }
+          .section-header .subtitle { font-size: 13px; color: #888; }
+          .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+          .kpi-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+          .kpi-card .label { font-size: 12px; color: #888; margin-bottom: 8px; }
+          .kpi-card .value { font-size: 28px; font-weight: 700; color: #2c2c2c; }
+          .kpi-card .change { font-size: 12px; margin-top: 6px; }
+          .change.up { color: #27ae60; } .change.down { color: #e74c3c; } .change.neutral { color: #888; }
+          .charts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px; }
+          .chart-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+          .chart-card .chart-title { font-size: 14px; font-weight: 600; color: #2c2c2c; margin-bottom: 16px; }
+          canvas { max-height: 200px; }
+          .table-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+          .table-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+          table { width: 100%; border-collapse: collapse; }
+          th { text-align: left; font-size: 12px; color: #888; font-weight: 600; padding: 8px 0; border-bottom: 1px solid #eee; }
+          td { padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
+          .sync-container { background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); max-width: 700px; margin: 0 auto; }
+          .sync-container h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+          .sync-container p { color: #666; margin-bottom: 24px; }
+          .sync-month-select { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; margin-bottom: 16px; }
+          .sync-btn { background: #7b68ee; color: #fff; border: none; padding: 14px 32px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
+          .sync-btn:hover { background: #6557d4; }
+          .sync-btn:disabled { background: #b5aef7; cursor: not-allowed; }
+          .sync-log { background: #1a1a2e; color: #00ff88; font-family: monospace; font-size: 13px; padding: 20px; border-radius: 10px; margin-top: 20px; min-height: 120px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; display: none; }
+          .sync-info { background: #f8f9ff; border-radius: 10px; padding: 20px; margin-top: 20px; }
+          .sync-info h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #555; }
+          .sync-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+          .sync-item { font-size: 13px; color: #666; padding: 4px 0; }
+          .progress-bar { background: #f0f0f0; border-radius: 4px; height: 8px; margin-top: 4px; }
+          .progress-fill { background: #7b68ee; height: 100%; border-radius: 4px; transition: width 0.4s; }
+          .listing-table td:last-child, .listing-table td:nth-child(2) { font-size: 12px; }
+          .accurate { color: #27ae60; } .error { color: #e67e22; } .notfound { color: #95a5a6; }
+          @media (max-width: 768px) { .main { padding: 16px; } .charts-grid { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        </style>
+  </head>
+  <body>
+
+    <div class="header">
+        <div class="header-left">
+              <h1>Executive Report</h1>
+            <p>Visit Fairfield, Fairfield CVB — 107 North Main Street, Fairfield, IA</p>
+        </div>div>
+      <div class="header-right">
+          <div class="month-selector">
+                <label>Month:</label>
+                <select id="monthSelect" onchange="switchMonth(this.value)">
+                        <option value="April 2026">April 2026</option>option>
+                        <option value="March 2026">March 2026</option>option>
+                </select>select>
+          </div>div>
+          <div class="period" id="periodDisplay">April 2026</div>div>
+      </div>div>
+    </div>div>
   
-  const es=new EventSource('/sync');
-  es.onmessage=function(e){
-    const msg=e.data;
-    if(msg==='DONE'){
-      es.close();
-      btn.textContent='✅ Synced to Asana!';
-      btn.disabled=false;
-      log.textContent+='\n✅ Sync complete! Asana dashboard updated.';
-    } else if(msg.startsWith('ERROR:')){
-      es.close();
-      btn.textContent='❌ Error — Try Again';
-      btn.disabled=false;
-      log.textContent+='\n'+msg;
-    } else {
-      log.textContent+='\n'+msg;
-      log.scrollTop=log.scrollHeight;
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showTab('overview')">Overview</div>div>
+    <div class="nav-tab" onclick="showTab('website')">Website</div>div>
+    <div class="nav-tab" onclick="showTab('traffic')">Traffic</div>div>
+    <div class="nav-tab" onclick="showTab('seo')">SEO</div>div>
+    <div class="nav-tab" onclick="showTab('listings')">Listings</div>div>
+    <div class="nav-tab" onclick="showTab('leads')">Leads</div>div>
+    <div class="nav-tab" onclick="showTab('sync')">Sync to Asana</div>div>
+  </div>div>
+  
+  <div class="main">
+  
+    <!-- OVERVIEW -->
+    <div id="tab-overview" class="section active">
+        <div class="section-header">
+              <h2>Overview</h2>
+              <span class="subtitle" id="overview-subtitle">All metrics — April 2026</span>span>
+        </div>div>
+        <div class="kpi-grid" id="overview-kpis"></div>div>
+        <div class="charts-grid" id="overview-charts"></div>div>
+    </div>div>
+  
+    <!-- WEBSITE -->
+    <div id="tab-website" class="section">
+        <div class="section-header">
+              <h2>🖥️ Website</h2>
+              <span class="subtitle">Is your website attracting potential customers?</span>span>
+        </div>div>
+        <div class="kpi-grid" id="website-kpis"></div>div>
+        <div class="charts-grid" id="website-charts"></div>div>
+    </div>div>
+  
+    <!-- TRAFFIC -->
+    <div id="tab-traffic" class="section">
+        <div class="section-header">
+              <h2>🚦 Traffic Sources</h2>
+              <span class="subtitle">Where is your traffic coming from?</span>span>
+        </div>div>
+        <div class="kpi-grid" id="traffic-kpis"></div>div>
+        <div class="charts-grid" id="traffic-charts"></div>div>
+    </div>div>
+  
+    <!-- SEO -->
+    <div id="tab-seo" class="section">
+        <div class="section-header">
+              <h2>🔍 SEO Performance</h2>
+              <span class="subtitle">How are you performing in search?</span>span>
+        </div>div>
+        <div class="kpi-grid" id="seo-kpis"></div>div>
+        <div class="charts-grid" id="seo-charts"></div>div>
+    </div>div>
+  
+    <!-- LISTINGS -->
+    <div id="tab-listings" class="section">
+        <div class="section-header">
+              <h2>📍 Listings</h2>
+              <span class="subtitle">Are you listed accurately on search engines, directories, and GPS?</span>span>
+        </div>div>
+        <div class="kpi-grid" id="listings-kpis"></div>div>
+        <div class="charts-grid" id="listings-charts"></div>div>
+    </div>div>
+  
+    <!-- LEADS -->
+    <div id="tab-leads" class="section">
+        <div class="section-header">
+              <h2>👥 Leads</h2>
+              <span class="subtitle">How many new leads and customer interactions are you generating?</span>span>
+        </div>div>
+        <div class="kpi-grid" id="leads-kpis"></div>div>
+    </div>div>
+  
+    <!-- SYNC -->
+    <div id="tab-sync" class="section">
+        <div class="sync-container">
+              <h2>Sync to Asana</h2>
+              <p>Push Executive Report data to your Asana dashboard. Each month gets its own Asana project with KPI tasks and custom fields.</p>
+              
+              <label style="font-size:14px;font-weight:600;color:#555;display:block;margin-bottom:8px;">Select Month to Sync:</label>
+              <select class="sync-month-select" id="syncMonthSelect">
+                      <option value="April 2026">April 2026 (existing project)</option>option>
+                      <option value="March 2026">March 2026 (new project)</option>option>
+              </select>select>
+              
+              <button class="sync-btn" id="syncBtn" onclick="startSync()">🔄 Sync to Asana</button>button>
+              <div class="sync-log" id="sync-log"></div>div>
+              
+              <div class="sync-info">
+                      <h3>What gets synced to Asana:</h3>
+                      <div class="sync-items">
+                                <div class="sync-item">📊 Website Metrics — 8 KPI tasks with details</div>div>
+                                <div class="sync-item">🚦 Traffic Sources — 7 channel tasks</div>div>
+                                <div class="sync-item">🔍 SEO Performance — 4 metric tasks</div>div>
+                                <div class="sync-item">📋 Listings & Citations — 7 tasks</div>div>
+                                <div class="sync-item">👥 Leads & Engagement — summary task</div>div>
+                                <div class="sync-item">✅ Tasks & Projects — 2 overview tasks</div>div>
+                      </div>div>
+              </div>div>
+        </div>div>
+    </div>div>
+  
+  </div>div>
+  
+  <script>
+    // ── Data ──────────────────────────────────────────────────────────
+    const REPORT_DATA = {
+        "April 2026": {
+              website: { activeUsers: 2517, sessions: 2836, pageViews: 5220, newUsers: 2329, engagedSessions: 1606, bounceRate: 55.2, pageViewsPerSession: 1.84, avgSessionDuration: "2:05" },
+              traffic: { direct: 1245, organicSearch: 1102, organicSocial: 98, referral: 89, unassigned: 302 },
+              seo: { organicClicks: 943, impressions: 108146, avgPosition: 1, queriesOnPage1: 196, keywordsTop10: 4 },
+              listings: { listingScore: 753, citations: 3, accurate: 29, possibleErrors: 2, notFound: 22 },
+              leads: { messages: 2, conversations: 0, leads: 0, totalContacts: 0, totalCompanies: 0, webChatVisitors: 2 },
+              tasks: { total: 26, inProgress: 20, completed: 6 },
+              projects: { total: 1, progress: 40 }
+        },
+        "March 2026": {
+              website: { activeUsers: 3423, sessions: 3778, pageViews: 5932, newUsers: 3204, engagedSessions: 1561, bounceRate: 58.68, pageViewsPerSession: 1.57, avgSessionDuration: "1:36" },
+              traffic: { direct: 1882, organicSearch: 1581, organicSocial: 161, referral: 140, unassigned: 14 },
+              seo: { organicClicks: 1216, impressions: 125176, avgPosition: 1, queriesOnPage1: 193, keywordsTop10: 2 },
+              listings: { listingScore: 718, citations: 2, accurate: 29, possibleErrors: 2, notFound: 22 },
+              leads: { messages: 0, conversations: 0, leads: 0, totalContacts: 0, totalCompanies: 0, webChatVisitors: 0 },
+              tasks: { total: 26, inProgress: 19, completed: 7 },
+              projects: { total: 1, progress: 38 }
+        }
+    };
+
+    let currentMonth = "April 2026";
+    let charts = {};
+
+    // ── Tab Navigation ──────────────────────────────────────────────
+    function showTab(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        event.target.classList.add('active');
     }
-  };
-  es.onerror=function(){
-    es.close();
-    btn.textContent='❌ Error — Try Again';
-    btn.disabled=false;
-    log.textContent+='\nConnection error - please try again.';
-  };
-}</script>
-</body>
-</html>
+
+    // ── Month Switch ──────────────────────────────────────────────
+    function switchMonth(month) {
+        currentMonth = month;
+        document.getElementById('periodDisplay').textContent = month;
+        document.getElementById('syncMonthSelect').value = month;
+        renderAll();
+    }
+
+    // ── Render helpers ──────────────────────────────────────────────
+    function kpiCard(label, value, change, direction) {
+        const cls = direction === 'up' ? 'up' : direction === 'down' ? 'down' : 'neutral';
+        const arrow = direction === 'up' ? '▲' : direction === 'down' ? '▼' : '';
+        return `<div class="kpi-card"><div class="label">${label}</div><div class="value">${value}</div>${change ? `<div class="change ${cls}">${arrow} ${change}</div>` : ''}</div>`;
+    }
+
+    function destroyChart(id) {
+        if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+    }
+
+    function makeChart(id, type, labels, datasets, opts = {}) {
+        destroyChart(id);
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        charts[id] = new Chart(canvas, {
+              type,
+              data: { labels, datasets },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: opts.legend ?? false } }, ...opts.extra }
+        });
+    }
+
+    // ── Render Overview ──────────────────────────────────────────────
+    function renderOverview(data, month) {
+        document.getElementById('overview-subtitle').textContent = `All metrics — ${month}`;
+        document.getElementById('overview-kpis').innerHTML =
+              kpiCard('Total Tasks', data.tasks.total, `${data.tasks.inProgress} in progress`, 'neutral') +
+              kpiCard('Projects', data.projects.total, `SEO Standard — ${data.projects.progress}%`, 'neutral') +
+              kpiCard('Active Users', data.website.activeUsers.toLocaleString(), '', 'neutral') +
+              kpiCard('Listing Score', data.listings.listingScore, '+30 — Grade A', 'up') +
+              kpiCard('Organic Clicks', data.seo.organicClicks.toLocaleString(), '', 'neutral') +
+              kpiCard('Web Chat Visitors', data.leads.webChatVisitors, '', 'neutral');
+
+        document.getElementById('overview-charts').innerHTML = `
+            <div class="chart-card"><div class="chart-title">Task Progress</div>
+                  <div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill" style="width:${Math.round(data.tasks.inProgress/data.tasks.total*100)}%;background:#9b59b6"></div></div>
+                        <small style="color:#888">In Progress (${data.tasks.inProgress})</small>
+                              <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${Math.round(data.tasks.completed/data.tasks.total*100)}%"></div></div>
+                                    <small style="color:#888">Completed (${data.tasks.completed})</small>
+                                        </div>
+                                            <div class="chart-card"><div class="chart-title">Website Active Users — Weekly</div><canvas id="overviewUsersChart"></canvas></div>`;
+
+        makeChart('overviewUsersChart', 'line',
+                      ['Apr 5','Apr 12','Apr 19','Apr 26'],
+                      [{ data: [420, 810, 820, 467], borderColor: '#7b68ee', backgroundColor: 'rgba(123,104,238,0.1)', fill: true, tension: 0.4 }]
+                    );
+    }
+
+    // ── Render Website ──────────────────────────────────────────────
+    function renderWebsite(data, month) {
+        document.getElementById('website-kpis').innerHTML =
+              kpiCard('Active Users', data.website.activeUsers.toLocaleString(), '', 'neutral') +
+              kpiCard('Sessions', data.website.sessions.toLocaleString(), '', 'neutral') +
+              kpiCard('Page Views', data.website.pageViews.toLocaleString(), '', 'neutral') +
+              kpiCard('New Users', data.website.newUsers.toLocaleString(), '', 'neutral') +
+              kpiCard('Engaged Sessions', data.website.engagedSessions.toLocaleString(), '', 'neutral') +
+              kpiCard('Avg Session Duration', data.website.avgSessionDuration, '', 'neutral') +
+              kpiCard('Bounce Rate', data.website.bounceRate + '%', '', 'neutral') +
+              kpiCard('Pages/Session', data.website.pageViewsPerSession, '', 'neutral');
+
+        document.getElementById('website-charts').innerHTML =
+              '<div class="chart-card"><div class="chart-title">Active Users — Daily</div><canvas id="websiteUsersChart"></canvas></div>' +
+              '<div class="chart-card"><div class="chart-title">Sessions — Daily</div><canvas id="websiteSessionsChart"></canvas></div>';
+
+        const wLabels = month === 'March 2026'
+          ? ['Mar 1','Mar 8','Mar 15','Mar 22','Mar 29']
+              : ['Apr 5','Apr 12','Apr 19','Apr 26'];
+        const uData = month === 'March 2026' ? [120,145,130,110,105] : [90,120,105,85];
+        const sData = month === 'March 2026' ? [135,160,145,125,118] : [100,135,118,95];
+
+        makeChart('websiteUsersChart','line', wLabels, [{ data: uData, borderColor:'#7b68ee', backgroundColor:'rgba(123,104,238,0.1)', fill:true, tension:0.4 }]);
+        makeChart('websiteSessionsChart','line', wLabels, [{ data: sData, borderColor:'#9b59b6', backgroundColor:'rgba(155,89,182,0.1)', fill:true, tension:0.4 }]);
+    }
+
+    // ── Render Traffic ──────────────────────────────────────────────
+    function renderTraffic(data, month) {
+        const t = data.traffic;
+        const total = t.direct + t.organicSearch + t.organicSocial + t.referral + t.unassigned;
+        document.getElementById('traffic-kpis').innerHTML =
+              kpiCard('Direct', t.direct.toLocaleString(), '', 'neutral') +
+              kpiCard('Organic Search', t.organicSearch.toLocaleString(), '', 'up') +
+              kpiCard('Organic Social', t.organicSocial.toLocaleString(), '', 'neutral') +
+              kpiCard('Referral', t.referral.toLocaleString(), '', 'up') +
+              kpiCard('Unassigned', t.unassigned.toLocaleString(), '', 'neutral');
+
+        document.getElementById('traffic-charts').innerHTML =
+              '<div class="chart-card"><div class="chart-title">Traffic Sources Breakdown</div><canvas id="trafficPieChart"></canvas></div>' +
+              '<div class="chart-card"><div class="chart-title">Traffic by Channel</div><canvas id="trafficBarChart"></canvas></div>';
+
+        makeChart('trafficPieChart','doughnut',
+                      ['Direct','Organic Search','Organic Social','Referral','Unassigned'],
+                      [{ data:[t.direct,t.organicSearch,t.organicSocial,t.referral,t.unassigned], backgroundColor:['#7b68ee','#27ae60','#e74c3c','#f39c12','#95a5a6'] }],
+                  { legend: true }
+                    );
+        makeChart('trafficBarChart','bar',
+                      ['Direct','Organic Search','Organic Social','Referral','Unassigned'],
+                      [{ data:[t.direct,t.organicSearch,t.organicSocial,t.referral,t.unassigned], backgroundColor:'#7b68ee' }]
+                    );
+    }
+
+    // ── Render SEO ──────────────────────────────────────────────────
+    function renderSEO(data, month) {
+        const s = data.seo;
+        document.getElementById('seo-kpis').innerHTML =
+              kpiCard('Organic Clicks', s.organicClicks.toLocaleString(), '', 'neutral') +
+              kpiCard('Impressions', s.impressions.toLocaleString(), '', 'neutral') +
+              kpiCard('Avg Position', s.avgPosition, '', 'up') +
+              kpiCard('Queries on Page 1', s.queriesOnPage1, '', 'neutral') +
+              kpiCard('Keywords Top 10', s.keywordsTop10, '', 'neutral');
+
+        document.getElementById('seo-charts').innerHTML =
+              '<div class="chart-card"><div class="chart-title">Clicks in Google Search</div><canvas id="seoClicksChart"></canvas></div>' +
+              '<div class="chart-card"><div class="chart-title">Impressions in Google Search</div><canvas id="seoImpressionsChart"></canvas></div>';
+
+        const sLabels = month === 'March 2026'
+          ? ['Mar 1','Mar 8','Mar 15','Mar 22','Mar 29']
+              : ['Apr 5','Apr 12','Apr 19','Apr 26'];
+        const cData = month === 'March 2026' ? [38,42,45,40,38] : [28,35,30,25];
+        const iData = month === 'March 2026' ? [4200,4600,4500,4100,3900] : [3200,3600,3400,3100];
+
+        makeChart('seoClicksChart','line', sLabels, [{ data:cData, borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.1)', fill:true, tension:0.4 }]);
+        makeChart('seoImpressionsChart','line', sLabels, [{ data:iData, borderColor:'#1abc9c', backgroundColor:'rgba(26,188,156,0.1)', fill:true, tension:0.4 }]);
+    }
+
+    // ── Render Listings ──────────────────────────────────────────────
+    function renderListings(data, month) {
+        const l = data.listings;
+        document.getElementById('listings-kpis').innerHTML =
+              kpiCard('Listing Score', l.listingScore, 'Grade A', 'up') +
+              kpiCard('Accurate Listings', l.accurate, '', 'up') +
+              kpiCard('Possible Errors', l.possibleErrors, '', 'down') +
+              kpiCard('Not Found', l.notFound, '', 'neutral') +
+              kpiCard('Citations', l.citations, '', 'neutral');
+
+        document.getElementById('listings-charts').innerHTML = `
+            <div class="chart-card"><div class="chart-title">Listing Score Progress</div><canvas id="listingScoreChart"></canvas></div>
+                <div class="table-card listing-table"><h3>Listing Details</h3>
+                      <table><thead><tr><th>Source</th><th>Accuracy</th><th>Status</th></tr></thead>
+                            <tbody>
+                                    <tr><td>Yelp</td><td class="error">Found with possible errors</td><td>✅ Synced</td></tr>
+                                            <tr><td>Google</td><td class="accurate">Accurate listing found</td><td>— Disabled</td></tr>
+                                                    <tr><td>Bing</td><td class="accurate">Accurate listing found</td><td>✅ Synced</td></tr>
+                                                            <tr><td>Facebook</td><td class="error">Found with possible errors</td><td>— Disabled</td></tr>
+                                                                    <tr><td>X (Twitter)</td><td class="notfound">Not found</td><td>✅ Synced</td></tr>
+                                                                            <tr><td>LinkedIn</td><td class="notfound">Not found</td><td>Manual only</td></tr>
+                                                                                  </tbody></table>
+                                                                                      </div>`;
+
+        const lLabels = month === 'March 2026'
+          ? ['Mar 15','Mar 18','Mar 21','Mar 24','Mar 27','Mar 30']
+              : ['Apr 5','Apr 10','Apr 15','Apr 20','Apr 25','Apr 30'];
+        const lData = month === 'March 2026' ? [399,450,620,680,700,718] : [718,730,740,748,750,753];
+
+        makeChart('listingScoreChart','line', lLabels, [{ data:lData, borderColor:'#27ae60', backgroundColor:'rgba(39,174,96,0.1)', fill:true, tension:0.4 }]);
+    }
+
+    // ── Render Leads ──────────────────────────────────────────────
+    function renderLeads(data, month) {
+        const l = data.leads;
+        document.getElementById('leads-kpis').innerHTML =
+              kpiCard('Messages', l.messages, 'no change', 'neutral') +
+              kpiCard('Conversations', l.conversations, 'no change', 'neutral') +
+              kpiCard('Leads', l.leads, 'no change', 'neutral') +
+              kpiCard('Total Contacts', l.totalContacts, 'no change', 'neutral') +
+              kpiCard('Total Companies', l.totalCompanies, 'no change', 'neutral') +
+              kpiCard('Web Chat Visitors', l.webChatVisitors, '', 'neutral');
+    }
+
+    // ── Render All ──────────────────────────────────────────────────
+    function renderAll() {
+        const data = REPORT_DATA[currentMonth];
+        if (!data) return;
+        renderOverview(data, currentMonth);
+        renderWebsite(data, currentMonth);
+        renderTraffic(data, currentMonth);
+        renderSEO(data, currentMonth);
+        renderListings(data, currentMonth);
+        renderLeads(data, currentMonth);
+    }
+
+    // ── Sync to Asana ──────────────────────────────────────────────
+    function startSync() {
+        const monthKey = document.getElementById('syncMonthSelect').value;
+        const btn = document.getElementById('syncBtn');
+        const log = document.getElementById('sync-log');
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Syncing...';
+        log.style.display = 'block';
+        log.textContent = `Starting sync for ${monthKey}...\n`;
+
+        // For April 2026 use existing project via GET /sync
+        // For other months use POST /sync-month to create new project
+        if (monthKey === 'April 2026') {
+              const es = new EventSource('/sync');
+              es.onmessage = (e) => {
+                      if (e.data === 'DONE') {
+                                es.close();
+                                btn.disabled = false;
+                                btn.textContent = '✅ Synced to Asana!';
+                                btn.style.background = '#27ae60';
+                                setTimeout(() => { btn.textContent = '🔄 Sync to Asana'; btn.style.background = ''; }, 4000);
+                      } else {
+                                log.textContent += e.data + '\n';
+                                log.scrollTop = log.scrollHeight;
+                      }
+              };
+              es.onerror = () => {
+                      es.close();
+                      btn.disabled = false;
+                      btn.textContent = '❌ Error — Try Again';
+                      btn.style.background = '#e74c3c';
+                      setTimeout(() => { btn.textContent = '🔄 Sync to Asana'; btn.style.background = ''; }, 4000);
+              };
+        } else {
+              // POST for new month project creation
+              fetch('/sync-month', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ monthKey })
+              }).then(res => {
+                      const reader = res.body.getReader();
+                      const decoder = new TextDecoder();
+                      function read() {
+                                reader.read().then(({ done, value }) => {
+                                            if (done) {
+                                                          btn.disabled = false;
+                                                          btn.textContent = '✅ Synced to Asana!';
+                                                          btn.style.background = '#27ae60';
+                                                          setTimeout(() => { btn.textContent = '🔄 Sync to Asana'; btn.style.background = ''; }, 4000);
+                                                          return;
+                                            }
+                                            const text = decoder.decode(value);
+                                            const lines = text.split('\n');
+                                            lines.forEach(line => {
+                                                          if (line.startsWith('data: ')) {
+                                                                          const msg = line.slice(6);
+                                                                          if (msg && msg !== 'DONE' && !msg.startsWith('PROJECT_GID:')) {
+                                                                                            log.textContent += msg + '\n';
+                                                                                            log.scrollTop = log.scrollHeight;
+                                                                          }
+                                                          }
+                                            });
+                                            read();
+                                });
+                      }
+                      read();
+              }).catch(err => {
+                      log.textContent += 'Error: ' + err.message + '\n';
+                      btn.disabled = false;
+                      btn.textContent = '❌ Error — Try Again';
+              });
+        }
+    }
+
+    // Init
+    renderAll();
+  </script>
+  </body>
+</html>html>
+
+  </script></label></p></h1>
+  </body>
+    </style></title>
+  </head>
